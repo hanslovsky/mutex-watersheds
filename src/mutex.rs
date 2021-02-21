@@ -2,33 +2,17 @@ use disjoint_sets::UnionFind;
 
 pub fn compute_mutex_watershed_clustering(
     num_labels: usize,
-    edges: &[(u32, u32, f64)],
-    mutex_edges: &[(u32, u32, f64)]) -> UnionFind<u32> {
+    edges: &[(u32, u32, f64, bool)]) -> UnionFind<u32> {
 
     let mut uf: UnionFind<u32> = UnionFind::new(num_labels);
-
     let num_edges = edges.len();
-    let num_mutex = mutex_edges.len();
-
     let mut mutexes: Vec<Vec<u32>> = (0..num_labels).map(|_| Vec::new()).collect();
-    
-    let mut indices: Vec<usize> = (0..(num_edges + num_mutex)).collect();
+    let mut indices: Vec<usize> = (0..num_edges).collect();
 
-    // helper to select edge weight
-    let _ew = |i: usize| -> f64 {
-        if i < num_edges {
-            edges[i].2
-        } else {
-            mutex_edges[i - num_edges].2
-        }
-    };
-    indices.sort_unstable_by(|i1, i2| _ew(*i1).partial_cmp(&_ew(*i2)).unwrap());
-    indices.reverse();
+    indices.sort_unstable_by(|i1, i2| edges[*i2].2.partial_cmp(&edges[*i1].2).unwrap());
 
     for edge_id in indices {
-        let is_mutex_edge = edge_id >= num_edges;
-        let actual_edge_id = if is_mutex_edge { edge_id - num_edges } else { edge_id };
-        let (from, to, w) = if is_mutex_edge { mutex_edges[actual_edge_id] } else { edges[actual_edge_id] };
+        let (from, to, w, is_mutex_edge) = edges[edge_id];
 
         if w.is_nan() { continue; }
         
@@ -37,7 +21,7 @@ pub fn compute_mutex_watershed_clustering(
         if from_r == to_r { continue; }
         if check_mutex(&mutexes, from_r as usize, to_r as usize) { continue; }
 
-        if is_mutex_edge { insert_mutex_for_two_representatives(&mut mutexes, from_r as usize, to_r as usize, actual_edge_id as u32) }
+        if is_mutex_edge { insert_mutex_for_two_representatives(&mut mutexes, from_r as usize, to_r as usize, edge_id as u32) }
         else {
             uf.union(from_r, to_r);
             if uf.find(from_r) == to_r { merge_mutexes(&mut mutexes[..], from_r as usize, to_r as usize); }
