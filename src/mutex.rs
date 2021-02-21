@@ -30,25 +30,6 @@ pub fn compute_mutex_watershed_clustering(
     }
         
 
-            // for (edgeId in indices) {
-
-            //     if (isMutexEdge)
-            //         mutexStorage.insertMutex(rootFrom, rootTo, actualEdgeId.toLong())
-            //     else {
-            //         uf.join(rootFrom, rootTo)
-
-            //         // Always only have mutexes for true roots!
-            //         // If the newly assigned root == rootTo, merge into rootTo,
-            //         // merge into rootFrom, otherwise
-            //         if (uf.findRoot(rootFrom) == rootTo)
-            //             mutexStorage.mergeMutexes(rootFrom, rootTo)
-            //         else
-            //             mutexStorage.mergeMutexes(rootTo, rootFrom)
-            //     }
-            // }
-
-    // return uf
-
     uf
     
 }
