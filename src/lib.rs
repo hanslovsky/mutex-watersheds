@@ -9,11 +9,15 @@ mod tests {
     fn mutex_ws() {
         let uf = super::mutex::compute_mutex_watershed_clustering(
             3,
-            &vec![(0, 1, 1.0, false), (1, 2, 0.0, false), (0, 2, 0.9, true)][..]
+            &vec![
+                (0, 1, 1.0, false),
+                (1, 2, 2.0, false),
+                (0, 2, 1.9, true),
+            ][..]
         );
-        for i in 0..3 {
-            println!("oke? {} -> {}", i, uf.find(i));
-        }
+        assert_ne!(uf.find(0), uf.find(1));
+        assert_ne!(uf.find(0), uf.find(2));
+        assert_eq!(uf.find(1), uf.find(2));
     }
 }
 
