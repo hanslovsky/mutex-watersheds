@@ -75,7 +75,7 @@ fn merge_mutexes(mutexes: &mut [Vec<u32>], r_from: usize, r_into: usize) {
         let (l1, l2) = mutexes.split_at_mut(r_into);
         (&mut l1[r_from], &mut l2[0])
     } else {
-        let (l2, l1) = mutexes.split_at_mut(r_from);
+        let (l1, l2) = mutexes.split_at_mut(r_from);
         (&mut l2[0], &mut l1[r_into])
     };
     
