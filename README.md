@@ -1,0 +1,5 @@
+# Mutex Watersheds
+
+**Note**: I created this repository to familiarize myself with Rust. Do not expect maintenance or regular activity or great documentation but feel free to use the library if it fits your needs. Also, as I am a total Rust noob, this library is probably very inefficient and will probably undergo some interface changes in the future.
+
+This is a Rust re-implementation of the mutex watersheds, originally developed by Steffen Wolf and Constantin Pape. The re-implementation is based off [mglib2-mutex-watershed](https://github.com/saalfeldlab/imglib2-mutex-watershed), [which ported Constantin Pape's C++ implementation](https://github.com/constantinpape/mutex-watershed) to Kotlin. Note that the original code has changed a lot since and moved to the [hci-unihd organization](https://github.com/hci-unihd/mutex-watershed). Please read the [original authors' paper](https://openaccess.thecvf.com/content_ECCV_2018/html/Steffen_Wolf_The_Mutex_Watershed_ECCV_2018_paper.html) for method details and quote accordingly.
