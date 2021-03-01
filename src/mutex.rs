@@ -3,6 +3,14 @@ use disjoint_sets::UnionFind;
 pub fn compute_mutex_watershed_clustering(
     num_labels: usize,
     edges: &[(u32, u32, f64, bool)]) -> UnionFind<u32> {
+    compute_mutex_watershed_clustering_with_callback(num_labels, edges, |_| {})
+}
+
+pub fn compute_mutex_watershed_clustering_with_callback<F>(
+    num_labels: usize,
+    edges: &[(u32, u32, f64, bool)],
+    callback: F) -> UnionFind<u32>
+      where F: Fn(&UnionFind<u32>) -> () {
 
     let mut uf: UnionFind<u32> = UnionFind::new(num_labels);
     let num_edges = edges.len();
@@ -27,6 +35,7 @@ pub fn compute_mutex_watershed_clustering(
             if uf.find(from_r) == to_r { merge_mutexes(&mut mutexes[..], from_r as usize, to_r as usize); }
             else { merge_mutexes(&mut mutexes[..], to_r as usize, from_r as usize); }
         }
+        callback(&uf)
     }
         
 
