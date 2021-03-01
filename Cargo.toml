@@ -1,5 +1,5 @@
 [package]
-name = "r_mutex-watersheds"
+name = "mutex-watersheds"
 version = "0.1.0"
 authors = ["Philipp Hanslovsky <philipp.hanslovsky@gmail.com>"]
 edition = "2018"
