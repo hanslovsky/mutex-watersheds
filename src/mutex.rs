@@ -1,4 +1,5 @@
 use disjoint_sets::UnionFind;
+use log::debug;
 
 pub fn compute_mutex_watershed_clustering(
     num_labels: usize,
@@ -17,7 +18,10 @@ pub fn compute_mutex_watershed_clustering_with_callback<F>(
     let mut mutexes: Vec<Vec<u32>> = (0..num_labels).map(|_| Vec::new()).collect();
     let mut indices: Vec<usize> = (0..num_edges).collect();
 
+    debug!("Sorting {} indices", indices.len());
     indices.sort_unstable_by(|i1, i2| edges[*i2].2.partial_cmp(&edges[*i1].2).unwrap());
+
+    debug!("Iterating over {} edges", indices.len());
 
     for edge_id in indices {
         let (from, to, w, is_mutex_edge) = edges[edge_id];
@@ -80,13 +84,16 @@ fn merge_mutexes(mutexes: &mut [Vec<u32>], r_from: usize, r_into: usize) {
     // try to get two mutable references of elements of the same slices
     // this seems rather complicated but compiles:
     // why do l_from, l_into not need to be mut?
-    let (l_from, l_into) = if r_from < r_into {
-        let (l1, l2) = mutexes.split_at_mut(r_into);
-        (&mut l1[r_from], &mut l2[0])
-    } else {
-        let (l1, l2) = mutexes.split_at_mut(r_from);
-        (&mut l2[0], &mut l1[r_into])
-    };
+    // let (l_from, l_into) = if r_from < r_into {
+    //     let (l1, l2) = mutexes.split_at_mut(r_into);
+    //     (&mut l1[r_from], &mut l2[0])
+    // } else {
+    //     let (l1, l2) = mutexes.split_at_mut(r_from);
+    //     (&mut l2[0], &mut l1[r_into])
+    // };
+
+    // possibly the best solution to create my own function that uses unsafe block:
+    let (l_from, l_into) = get_two_mutable_references(&mut mutexes[..], r_from, r_into);
     
 
     let mut i_from = 0;
@@ -98,5 +105,13 @@ fn merge_mutexes(mutexes: &mut [Vec<u32>], r_from: usize, r_into: usize) {
 
     l_into.extend_from_slice(&l_from[i_from..]);
     mutexes[r_from] = Vec::with_capacity(0);
+}
+
+fn get_two_mutable_references<T>(slice: &mut [T], index1: usize, index2: usize) -> (&mut T, &mut T) {
+    let p1: *mut T = &mut slice[index1];
+    let p2: *mut T = &mut slice[index2];
+    unsafe {
+        return (&mut *p1, &mut *p2);
+    }
 }
 

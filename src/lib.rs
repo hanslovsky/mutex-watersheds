@@ -5,11 +5,16 @@ pub mod mutex;
 #[cfg(test)]
 mod tests {
 
+    extern crate pretty_env_logger;
+
+
     use std::collections::HashMap;
     use disjoint_sets::UnionFind;
+    use pretty_env_logger as _log;
 
     #[test]
     fn mutex_ws() {
+        let _ = _log::try_init();
         let uf = super::mutex::compute_mutex_watershed_clustering(
             3,
             &vec![
@@ -39,6 +44,7 @@ mod tests {
 
     #[test]
     fn mutex_ws_variable_edge() {
+        let _ = _log::try_init();
         mutex_ws_for_edges(
             &EDGES_BASE,
             &[vec![0, 1, 2, 3], vec![4, 5, 6, 7, 8]]);
