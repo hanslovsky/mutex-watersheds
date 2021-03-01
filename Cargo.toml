@@ -1,8 +1,14 @@
 [package]
 name = "mutex-watersheds"
+description = "Mutex Watershed based off the original C++ implementation by Steffen Wolf and Constantin Pape."
 version = "0.1.0"
 authors = ["Philipp Hanslovsky <philipp.hanslovsky@gmail.com>"]
 edition = "2018"
+homepage = "https://github.com/hanslovsky/mutex-watersheds"
+repository = "https://github.com/hanslovsky/mutex-watersheds"
+documentation = "https://github.com/hanslovsky/mutex-watersheds"
+readme = "README.md"
+license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
