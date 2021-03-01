@@ -9,3 +9,9 @@ edition = "2018"
 [dependencies]
 disjoint-sets = "0.4.2"
 
+[lib]
+test = true
+# no benchmarks set up
+bench = false
+crate-type = ["lib"]
+
