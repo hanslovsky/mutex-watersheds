@@ -11,23 +11,92 @@ pub fn compute_mutex_watershed_clustering_with_callback<F>(
     num_labels: usize,
     edges: &[(u32, u32, f64, bool)],
     callback: F) -> UnionFind<u32>
-      where F: Fn(&UnionFind<u32>) -> () {
+where F: Fn(&UnionFind<u32>) -> () {
 
-    let mut uf: UnionFind<u32> = UnionFind::new(num_labels);
     let num_edges = edges.len();
-    let mut mutexes: Vec<Vec<u32>> = (0..num_labels).map(|_| Vec::new()).collect();
     let mut indices: Vec<usize> = (0..num_edges).collect();
 
     debug!("Sorting {} indices", indices.len());
     indices.sort_unstable_by(|i1, i2| edges[*i2].2.partial_cmp(&edges[*i1].2).unwrap());
 
-    debug!("Iterating over {} edges", indices.len());
+    let data = |idx: &usize| &edges[*idx];
+    let index_edges = IndexArrayIter::new(&data, indices.iter());
 
-    for edge_id in indices {
-        let (from, to, w, is_mutex_edge) = edges[edge_id];
+    mutex_watershed_mst_cut_iter_with_callback(num_labels, index_edges, callback)
 
-        if w.is_nan() { continue; }
-        
+}
+
+pub trait Edge {
+    fn from(&self) -> u32;
+    fn to(&self) -> u32;
+    fn is_mutex_edge(&self) -> bool;
+}
+
+struct IndexArrayIter<'a, T: 'a, F: 'a + Fn(&usize) -> &'a T, I: Iterator<Item = &'a usize>> {
+    data: &'a F,
+    index_iterator: I
+}
+
+impl <'a, T: 'a, F: 'a + Fn(&usize) -> &'a T, I: Iterator<Item = &'a usize>> IndexArrayIter<'a, T, F, I> {
+    pub fn new(data: &'a F, indices: I) -> Self {
+        Self{
+            data: data,
+            index_iterator: indices
+        }
+    }
+}
+
+impl <'a, T: 'a, F: 'a + Fn(&usize) -> &'a T, I: Iterator<Item = &'a usize>> Iterator for IndexArrayIter<'a, T, F, I> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<&'a T> {
+        self.index_iterator.next().map(self.data)
+    }
+}
+
+impl Edge for (u32, u32, f64, bool) {
+    fn from(&self) -> u32 {
+        self.0
+    }
+    fn to(&self) -> u32 {
+        self.1
+    }
+    fn is_mutex_edge(&self) -> bool {
+        self.3
+    }
+}
+
+impl Edge for (u32, u32, bool) {
+    fn from(&self) -> u32 {
+        self.0
+    }
+    fn to(&self) -> u32 {
+        self.1
+    }
+    fn is_mutex_edge(&self) -> bool {
+        self.2
+    }
+}
+
+pub fn mutex_watershed_mst_cut_with_callback<F>(
+    num_labels: usize,
+    sorted_edges: &[impl Edge],
+    callback: F) -> UnionFind<u32>
+where F: Fn(&UnionFind<u32>) -> () {
+    mutex_watershed_mst_cut_iter_with_callback(num_labels, sorted_edges.iter(), callback)
+}
+
+pub fn mutex_watershed_mst_cut_iter_with_callback<'a, E: 'a + Edge, I: Iterator<Item = &'a E>, F>(
+    num_labels: usize,
+    sorted_edges: I,
+    callback: F) -> UnionFind<u32>
+where F: Fn(&UnionFind<u32>) -> () {
+    let mut uf: UnionFind<u32> = UnionFind::new(num_labels);
+    let mut mutexes: Vec<Vec<u32>> = (0..num_labels).map(|_| Vec::new()).collect();
+
+    for (edge_id, edge) in sorted_edges.enumerate() {
+        let from = edge.from();
+        let to = edge.to();
+        let is_mutex_edge = edge.is_mutex_edge();
         let (from_r, to_r) = (uf.find(from), uf.find(to));
 
         if from_r == to_r { continue; }
@@ -44,7 +113,6 @@ pub fn compute_mutex_watershed_clustering_with_callback<F>(
         
 
     uf
-    
 }
 
 fn check_mutex(mutexes: &[Vec<u32>], r_one: usize, r_two: usize) -> bool {
